@@ -3,8 +3,10 @@ console.log("✅ Teams Monitor content.js loaded!");
 (function () {
   let meetingStarted = false;
   let startTime = null;
+  let justEnded = false; // prevent duplicate "started" after leaving
 
   function logMeetingStart() {
+    if (meetingStarted || justEnded) return; // block duplicates
     startTime = new Date();
     meetingStarted = true;
     console.log(`[Teams Monitor] ✅ Meeting started at: ${startTime.toLocaleString()}`);
@@ -26,17 +28,23 @@ console.log("✅ Teams Monitor content.js loaded!");
     console.log(`[Teams Monitor] 🛑 Meeting ended at: ${endTime.toLocaleString()}`);
     console.log(`[Teams Monitor] ⏱ Duration: ${durationMinutes} min ${remainingSeconds} sec`);
     meetingStarted = false;
+    justEnded = true; // block new start until reset
 
     chrome.runtime.sendMessage({
       type: "meeting-end",
       time: endTime.toLocaleTimeString(),
       duration: `${durationMinutes} min ${remainingSeconds} sec`
     });
+
+    // reset after a few seconds (so a *real* new meeting can trigger start again)
+    setTimeout(() => {
+      justEnded = false;
+    }, 5000);
   }
 
-  // Observe DOM for meeting UI
+  // Observe DOM
   const observer = new MutationObserver(() => {
-    // Detect Leave button and attach listener
+    // Detect Leave button
     const leaveButton = document.querySelector('button[aria-label="Leave"]');
     if (leaveButton && !leaveButton.dataset.listenerAdded) {
       console.log("[Teams Monitor] 🔘 Leave button found, attaching listener...");
@@ -48,7 +56,7 @@ console.log("✅ Teams Monitor content.js loaded!");
 
     // Detect toolbar → mark meeting start
     const toolbar = document.querySelector('div[role="toolbar"][aria-label="Meeting controls"]');
-    if (toolbar && !meetingStarted) {
+    if (toolbar) {
       logMeetingStart();
     }
   });
