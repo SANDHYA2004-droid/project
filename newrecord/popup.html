@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Recorder Settings</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 15px; width: 250px; }
+      label { display: block; margin-top: 10px; }
+      button { margin-top: 15px; padding: 8px 12px; border: none; background: #4CAF50; color: white; border-radius: 6px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <h3>Recording Mode</h3>
+    <label><input type="radio" name="mode" value="audio"> Audio Only</label>
+    <label><input type="radio" name="mode" value="video"> Video Only</label>
+    <label><input type="radio" name="mode" value="audiovideo"> Audio + Video</label>
+    <button id="save">Save</button>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
